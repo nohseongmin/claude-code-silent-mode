@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 300" width="820" height="300" role="img" aria-label="trappist - silent mode for Claude Code">
+  <defs>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+      .dim  { fill: #6e7681; }
+      .mid  { fill: #8b949e; }
+      .fg   { fill: #e6edf3; }
+      .ok   { fill: #3fb950; }
+    </style>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#161b22"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="820" height="300" rx="14" fill="url(#fade)"/>
+  <rect x="0.5" y="0.5" width="819" height="299" rx="14" fill="none" stroke="#30363d"/>
+
+  <circle cx="28" cy="28" r="6" fill="#30363d"/>
+  <circle cx="48" cy="28" r="6" fill="#30363d"/>
+  <circle cx="68" cy="28" r="6" fill="#30363d"/>
+
+  <text class="mono fg" x="40" y="102" font-size="42" font-weight="700" letter-spacing="1">trappist</text>
+  <text class="mono mid" x="40" y="130" font-size="15">silent mode for Claude Code</text>
+
+  <line x1="40" y1="156" x2="780" y2="156" stroke="#21262d"/>
+
+  <text class="mono mid" x="40" y="192" font-size="14">&gt; add rate limiting to the login route</text>
+
+  <text class="mono" x="40" y="228" font-size="14">
+    <tspan class="ok">&#10003;</tspan><tspan class="fg" xml:space="preserve"> rate limit on POST /login</tspan><tspan class="dim"> &#183; </tspan><tspan class="fg">2 files</tspan><tspan class="dim"> &#183; </tspan><tspan class="fg">8/8 tests</tspan>
+  </text>
+  <text class="mono mid" x="40" y="250" font-size="14">next: npm test</text>
+
+  <text class="mono dim" x="40" y="278" font-size="13">that is the entire turn</text>
+</svg>
