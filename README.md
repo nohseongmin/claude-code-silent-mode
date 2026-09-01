@@ -1,4 +1,4 @@
-# trappist
+# trappist — silent mode for Claude Code
 
 **Vow of silence for Claude Code.** The agent does the work and stops talking — no
 preamble, no narration between tool calls, no closing summary. One receipt line
@@ -51,7 +51,7 @@ validation, no skipped error handling, no skipped tests to keep the receipt shor
 ## Install
 
 ```bash
-claude plugin marketplace add nohseongmin/trappist
+claude plugin marketplace add nohseongmin/claude-code-silent-mode
 ```
 
 ```bash
@@ -59,6 +59,9 @@ claude plugin install trappist@trappist
 ```
 
 Active from the next session start. No config needed.
+
+The repo is named for what it does; the plugin, skill, and command are all
+`trappist`.
 
 ## Use
 
