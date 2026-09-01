@@ -1,0 +1,35 @@
+{
+  "name": "trappist",
+  "version": "0.1.0",
+  "description": "Vow of silence for Claude Code. No preamble, no narration, no summary — the work, then a one-line receipt.",
+  "author": {
+    "name": "Seongmin Noh",
+    "url": "https://github.com/nohseongmin"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/trappist.js\" session",
+            "timeout": 5,
+            "statusMessage": "Taking the vow..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/trappist.js\" prompt",
+            "timeout": 5,
+            "statusMessage": "Keeping the vow..."
+          }
+        ]
+      }
+    ]
+  }
+}

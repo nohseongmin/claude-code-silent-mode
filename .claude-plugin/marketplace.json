@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "trappist",
+  "description": "Silent execution mode for Claude Code. Claude does the work and shuts up: one receipt line instead of a conversation.",
+  "owner": {
+    "name": "Seongmin Noh",
+    "url": "https://github.com/nohseongmin"
+  },
+  "plugins": [
+    {
+      "name": "trappist",
+      "description": "Vow of silence. No preamble, no narration, no summary — the work, then a one-line receipt.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
