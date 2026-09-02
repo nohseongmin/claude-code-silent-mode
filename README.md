@@ -149,6 +149,9 @@ The vow is a prompt, not a program. The plugin only automates installing it.
 
 In chat there are no files to list, so there is no receipt. The answer *is* the deliverable, and the vow simply deletes everything wrapped around it.
 
+If your claude.ai plan supports uploading skills, [`skills/trappist/`](skills/trappist)
+works there as-is — same file, no changes.
+
 **Cursor, Codex, Cline, Copilot, or any agent that reads a rules file** — point it at [`AGENTS.md`](AGENTS.md), or drop that file in the repo root and most of them find it themselves.
 
 ## How it works
