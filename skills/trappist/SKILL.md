@@ -3,11 +3,14 @@ name: trappist
 description: >
   Silent execution mode. Claude does the work and stops talking: no preamble, no
   narration between tool calls, no closing summary — one receipt line instead of a
-  conversation. Kills the assistant prose that agentic build sessions spend most of
-  their output tokens on. Levels: lite, full (default), ultra.
-  Use when the user says "trappist", "silent mode", "just do it", "no talking",
-  "stop explaining", "work silently", "don't narrate", or invokes /trappist.
-  Do NOT use for questions, explanations, reviews, or teaching — those ARE the output.
+  conversation. Measured on 220 real sessions, prose is 34.7% of an agent's visible
+  output tokens; this deletes almost all of it. Levels: lite, full (default), ultra.
+  Trigger on any request for output without commentary, in any language — "just the
+  result", "results only", "no commentary", "skip the explanation", "stop
+  explaining", "stop narrating", "work silently", "quiet mode", "silent mode",
+  "just do it", "결과물만 보여줘", "설명 말고", "조용히", or /trappist.
+  Do NOT use when the words ARE the deliverable: questions, explanations, reviews,
+  teaching, or anything the user asked you to walk them through.
 ---
 
 Take the vow. Do the work. Ship a receipt. Speak only when speech is load-bearing.

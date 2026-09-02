@@ -96,14 +96,20 @@ function parse(prompt) {
 
   if (/\b(stop|disable|deactivate|quit|exit) (the )?trappist\b/.test(p) ||
       /\btrappist( mode)? off\b/.test(p) ||
-      /^(please )?(go |back to |switch (back )?to )?normal mode\b/.test(p)) return OFF;
+      /^(please )?(go |back to |switch (back )?to )?normal mode\b/.test(p) ||
+      /(설명해 ?줘|자세히 설명|설명 필요)/.test(p)) return OFF;
 
-  // Questions about the mode are not commands to enter it.
-  if (/^(what|whats|what's|how|why|when|does|do|is|are|can|should|explain|tell me)\b/.test(p)) return null;
+  // Questions are never commands. The trailing '?' catches languages whose
+  // interrogatives do not sit at the front of the sentence.
+  if (/\?\s*$/.test(p) ||
+      /^(what|whats|what's|how|why|when|does|do|is|are|can|should|explain|tell me)\b/.test(p)) return null;
 
+  // Intent triggers. The hook catches the explicit phrasings deterministically;
+  // everything else is left to ordinary skill matching on the description.
   if (/\b(activate|enable|start|turn on|use|switch to) trappist\b/.test(p) ||
       /^trappist( mode)?[.!]*$/.test(p) ||
-      /\b(silent mode|work silently|stop narrating|stop explaining|no narration|just do it, no talking)\b/.test(p)) return 'full';
+      /\b(silent mode|quiet mode|work silently|work quietly|stop narrating|stop explaining|no narration|no commentary|results? only|just the results?|skip the explanation|less talk)\b/.test(p) ||
+      /(결과물만|결과만|설명 ?말고|설명하지 ?말|말 ?그만|조용히|브리핑 ?말고|요약 ?말고|침묵 ?모드)/.test(p)) return 'full';
 
   return null;
 }

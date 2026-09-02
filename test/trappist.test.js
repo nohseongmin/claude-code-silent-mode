@@ -37,6 +37,21 @@ test('parse ignores questions and unrelated prompts', () => {
   assert.equal(parse('/trappist bogus'), null);
 });
 
+test('parse takes the vow on intent, in any language', () => {
+  for (const p of ['results only', 'just the result', 'no commentary',
+                   'skip the explanation', 'work quietly',
+                   '결과물만 보여줘', '설명 말고 그냥 해', '조용히 해줘']) {
+    assert.equal(parse(p), 'full', p);
+  }
+});
+
+test('parse never mistakes a question for a command', () => {
+  for (const p of ['trappist가 뭐야?', '왜 이렇게 느려?', 'is quiet mode on?']) {
+    assert.equal(parse(p), null, p);
+  }
+  assert.equal(parse('설명해줘'), 'off');
+});
+
 test('rules keeps only the active intensity row', () => {
   const ultra = rules('ultra');
   assert.match(ultra, /\*\*ultra\*\*/);
