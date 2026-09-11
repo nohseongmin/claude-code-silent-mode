@@ -4,6 +4,6 @@
   "description": "Vow of silence for Claude Code. No preamble, no narration, no summary - the work, then a one-line receipt.",
   "license": "MIT",
   "scripts": {
-    "test": "node --test test/trappist.test.js"
+    "test": "node --test test/trappist.test.js test/measure.test.js"
   }
 }

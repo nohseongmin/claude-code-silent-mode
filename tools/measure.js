@@ -23,13 +23,6 @@ const os = require('os');
 const RECEIPT_TOKENS = 25;          // "✓ <what> · <files> · <check>" + "next: <cmd>"
 const MAX_FILE_BYTES = 200 * 1024 * 1024;
 
-const args = process.argv.slice(2);
-const asJson = args.includes('--json');
-const dirArg = args[args.indexOf('--dir') + 1];
-const root = args.includes('--dir') && dirArg
-  ? dirArg
-  : path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'projects');
-
 function walk(dir, out = []) {
   let entries = [];
   try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return out; }
@@ -98,42 +91,53 @@ function measureFile(file) {
   return acc.messages ? acc : null;
 }
 
-const files = walk(root);
-const total = { prose: 0, work: 0, thinking: 0, turns: 0, messages: 0, saved: 0, sessions: 0 };
-const perTurn = [];
-for (const f of files) {
-  const m = measureFile(f);
-  if (!m) continue;
-  total.sessions++;
-  for (const k of ['prose', 'work', 'thinking', 'turns', 'messages', 'saved']) total[k] += m[k];
-  perTurn.push(...m.perTurn);
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const asJson = args.includes('--json');
+  const dirArg = args[args.indexOf('--dir') + 1];
+  const root = args.includes('--dir') && dirArg
+    ? dirArg
+    : path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'projects');
+
+  const files = walk(root);
+  const total = { prose: 0, work: 0, thinking: 0, turns: 0, messages: 0, saved: 0, sessions: 0 };
+  const perTurn = [];
+  for (const f of files) {
+    const m = measureFile(f);
+    if (!m) continue;
+    total.sessions++;
+    for (const k of ['prose', 'work', 'thinking', 'turns', 'messages', 'saved']) total[k] += m[k];
+    perTurn.push(...m.perTurn);
+  }
+
+  const visible = total.prose + total.work;
+  const pct = (n, d) => (d ? (100 * n / d) : 0);
+  const proseShare = pct(total.prose, visible);
+  perTurn.sort((a, b) => a - b);
+  const median = perTurn.length ? perTurn[Math.floor(perTurn.length / 2)] : 0;
+  const cut = pct(total.saved, visible);
+
+  if (asJson) {
+    const { perTurn: _drop, ...rest } = total;
+    console.log(JSON.stringify({ ...rest, visible, proseShare, cut, medianProsePerTurn: median }, null, 2));
+  } else if (!visible) {
+    console.log('No transcripts with usage data found under ' + root);
+  } else {
+    const bar = p => '\u2588'.repeat(Math.round(p / 10)) + '\u2591'.repeat(10 - Math.round(p / 10));
+    const k = n => (n / 1000).toFixed(1) + 'k';
+    console.log('');
+    console.log('  ' + total.sessions + ' sessions \u00b7 ' + total.turns + ' turns \u00b7 ' + total.messages + ' assistant messages');
+    console.log('  ' + k(visible) + ' visible output tokens (thinking excluded: ' + k(total.thinking) + ')');
+    console.log('');
+    console.log('  prose   ' + bar(proseShare) + ' ' + proseShare.toFixed(1).padStart(5) + '%  ' + k(total.prose));
+    console.log('  work    ' + bar(100 - proseShare) + ' ' + (100 - proseShare).toFixed(1).padStart(5) + '%  ' + k(total.work));
+    console.log('');
+    console.log('  median turn spends ' + median + ' tokens talking; a receipt is ' + RECEIPT_TOKENS);
+    console.log('');
+    console.log('  under the vow, at most ' + k(total.saved) + ' of that prose goes away');
+    console.log('  = ' + cut.toFixed(1) + '% of visible output tokens, ' + pct(total.saved, total.prose).toFixed(1) + '% of the prose itself');
+    console.log('');
+  }
 }
 
-const visible = total.prose + total.work;
-const pct = (n, d) => (d ? (100 * n / d) : 0);
-const proseShare = pct(total.prose, visible);
-perTurn.sort((a, b) => a - b);
-const median = perTurn.length ? perTurn[Math.floor(perTurn.length / 2)] : 0;
-const cut = pct(total.saved, visible);
-
-if (asJson) {
-  const { perTurn: _drop, ...rest } = total;
-  console.log(JSON.stringify({ ...rest, visible, proseShare, cut, medianProsePerTurn: median }, null, 2));
-} else if (!visible) {
-  console.log('No transcripts with usage data found under ' + root);
-} else {
-  const bar = p => '\u2588'.repeat(Math.round(p / 10)) + '\u2591'.repeat(10 - Math.round(p / 10));
-  const k = n => (n / 1000).toFixed(1) + 'k';
-  console.log('');
-  console.log('  ' + total.sessions + ' sessions \u00b7 ' + total.turns + ' turns \u00b7 ' + total.messages + ' assistant messages');
-  console.log('  ' + k(visible) + ' visible output tokens (thinking excluded: ' + k(total.thinking) + ')');
-  console.log('');
-  console.log('  prose   ' + bar(proseShare) + ' ' + proseShare.toFixed(1).padStart(5) + '%  ' + k(total.prose));
-  console.log('  work    ' + bar(100 - proseShare) + ' ' + (100 - proseShare).toFixed(1).padStart(5) + '%  ' + k(total.work));
-  console.log('');
-  console.log('  median turn spends ' + median + ' tokens talking; a receipt is ' + RECEIPT_TOKENS);
-  console.log('');
-  console.log('  under the vow, at most ' + k(total.saved) + ' of that prose goes away');
-  console.log('  = ' + cut.toFixed(1) + '% of visible output tokens, ' + pct(total.saved, total.prose).toFixed(1) + '% of the prose itself');
-  console.log('');
-}
+module.exports = { walk, isUserTurn, measureFile, RECEIPT_TOKENS };
