@@ -86,7 +86,7 @@ function parse(prompt) {
   const p = prompt.trim().toLowerCase().replace(/\s+/g, ' ');
 
   // Marketplace installs namespace commands as /trappist:trappist.
-  const cmd = /^\/trappist(?::trappist)?(?:\s+(\S+))?/.exec(p);
+  const cmd = /^\/trappist(?::trappist)?(?=\s|$)(?:\s+(\S+))?/.exec(p);
   if (cmd) {
     const arg = cmd[1];
     if (!arg) return 'full';

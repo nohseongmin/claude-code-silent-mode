@@ -37,6 +37,13 @@ test('parse ignores questions and unrelated prompts', () => {
   assert.equal(parse('/trappist bogus'), null);
 });
 
+test('parse ignores commands that only share the trappist prefix', () => {
+  for (const p of ['/trappistoff', '/trappist-helper off',
+                   '/trappist:other', '/trappist:trappist-helper lite']) {
+    assert.equal(parse(p), null, p);
+  }
+});
+
 test('parse takes the vow on intent, in any language', () => {
   for (const p of ['results only', 'just the result', 'no commentary',
                    'skip the explanation', 'work quietly',
