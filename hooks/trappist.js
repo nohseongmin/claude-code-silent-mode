@@ -94,15 +94,15 @@ function parse(prompt) {
     return MODES.includes(arg) ? arg : null;
   }
 
-  if (/\b(stop|disable|deactivate|quit|exit) (the )?trappist\b/.test(p) ||
-      /\btrappist( mode)? off\b/.test(p) ||
-      /^(please )?(go |back to |switch (back )?to )?normal mode\b/.test(p) ||
-      /(설명해 ?줘|자세히 설명|설명 필요)/.test(p)) return OFF;
-
   // Questions are never commands. The trailing '?' catches languages whose
   // interrogatives do not sit at the front of the sentence.
   if (/\?\s*$/.test(p) ||
       /^(what|whats|what's|how|why|when|does|do|is|are|can|should|explain|tell me)\b/.test(p)) return null;
+
+  if (/\b(stop|disable|deactivate|quit|exit) (the )?trappist\b/.test(p) ||
+      /\btrappist( mode)? off\b/.test(p) ||
+      /^(please )?(go |back to |switch (back )?to )?normal mode\b/.test(p) ||
+      /(설명해 ?줘|자세히 설명|설명 필요)/.test(p)) return OFF;
 
   // Intent triggers. The hook catches the explicit phrasings deterministically;
   // everything else is left to ordinary skill matching on the description.

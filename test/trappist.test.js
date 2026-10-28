@@ -53,7 +53,9 @@ test('parse takes the vow on intent, in any language', () => {
 });
 
 test('parse never mistakes a question for a command', () => {
-  for (const p of ['trappist가 뭐야?', '왜 이렇게 느려?', 'is quiet mode on?']) {
+  for (const p of ['trappist가 뭐야?', '왜 이렇게 느려?', 'is quiet mode on?',
+                   'how do I stop trappist', 'is trappist mode off?',
+                   'normal mode?', '설명해줘?']) {
     assert.equal(parse(p), null, p);
   }
   assert.equal(parse('설명해줘'), 'off');
@@ -90,6 +92,15 @@ test('mode switch persists and off silences the hook entirely', () => {
   assert.equal(execFileSync(process.execPath, [HOOK, 'session'], {
     encoding: 'utf8', env: { ...process.env, CLAUDE_CONFIG_DIR: dir }
   }), '');
+});
+
+test('questions about disabling trappist preserve the current mode', () => {
+  const dir = tmpConfig();
+  runPrompt('/trappist ultra', dir);
+
+  assert.match(runPrompt('how do I stop trappist', dir), /TRAPPIST ACTIVE \(ultra\)/);
+  assert.match(runPrompt('next task', dir), /TRAPPIST ACTIVE \(ultra\)/);
+  assert.equal(fs.readFileSync(path.join(dir, '.trappist-mode'), 'utf8'), 'ultra');
 });
 
 test('a tampered flag file never reaches model context', () => {
