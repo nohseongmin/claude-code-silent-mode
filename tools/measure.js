@@ -65,6 +65,7 @@ function measureFile(file) {
     if (!line) continue;
     let rec;
     try { rec = JSON.parse(line); } catch { continue; }
+    if (!rec || typeof rec !== 'object') continue;
 
     if (isUserTurn(rec)) { closeTurn(); continue; }
     if (rec.type !== 'assistant' || !rec.message || !rec.message.usage) continue;

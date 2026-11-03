@@ -45,6 +45,16 @@ test('measureFile ignores unparsable lines and blank lines', () => {
   assert.equal(m.prose, 10);
 });
 
+test('measureFile ignores JSON values that are not records', () => {
+  const file = tmpTranscript([
+    null, true, 42, 'not a record', [],
+    assistantMsg({ output_tokens: 10 }, [{ type: 'text', text: 'ok' }])
+  ]);
+  const m = measureFile(file);
+  assert.equal(m.messages, 1);
+  assert.equal(m.prose, 10);
+});
+
 test('measureFile splits prose vs work by serialized character share', () => {
   const text = [{ type: 'text', text: 'a'.repeat(10) }];      // ~30 chars serialized
   const tool = [{ type: 'tool_use', name: 'Read', input: { a: 1 } }]; // ~30 chars serialized
