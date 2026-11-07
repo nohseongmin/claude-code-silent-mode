@@ -55,6 +55,36 @@ test('measureFile ignores JSON values that are not records', () => {
   assert.equal(m.prose, 10);
 });
 
+test('measureFile ignores non-array assistant content and continues measuring', () => {
+  const file = tmpTranscript([
+    ...[null, true, 42, 'not blocks', {}].map(content =>
+      assistantMsg({ output_tokens: 50 }, content)),
+    assistantMsg({ output_tokens: 10 }, [{ type: 'text', text: 'ok' }])
+  ]);
+  const m = measureFile(file);
+  assert.equal(m.messages, 6);
+  assert.equal(m.prose, 10);
+  assert.equal(m.work, 0);
+});
+
+test('measureFile ignores null blocks while preserving tool results and turn totals', () => {
+  const file = tmpTranscript([
+    { type: 'user', message: { content: [null, { type: 'text', text: 'do the thing' }] } },
+    assistantMsg({ output_tokens: 30 }, [null, { type: 'text', text: 'working' }]),
+    { type: 'user', message: { content: [null, { type: 'tool_result', content: 'ok' }] } },
+    assistantMsg({ output_tokens: 20 }, [null, { type: 'tool_use', name: 'Read', input: {} }]),
+    assistantMsg({ output_tokens: 40 }, [{ type: 'text', text: 'done' }, null]),
+    { type: 'user', message: { content: [{ type: 'text', text: 'next task' }, null] } }
+  ]);
+  const m = measureFile(file);
+  assert.equal(m.messages, 3);
+  assert.equal(m.prose, 70);
+  assert.equal(m.work, 20);
+  assert.equal(m.turns, 1);
+  assert.deepEqual(m.perTurn, [70]);
+  assert.equal(m.saved, 30 + 15);
+});
+
 test('measureFile splits prose vs work by serialized character share', () => {
   const text = [{ type: 'text', text: 'a'.repeat(10) }];      // ~30 chars serialized
   const tool = [{ type: 'tool_use', name: 'Read', input: { a: 1 } }]; // ~30 chars serialized

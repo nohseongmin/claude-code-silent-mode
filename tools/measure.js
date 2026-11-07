@@ -42,7 +42,7 @@ function isUserTurn(rec) {
   if (rec.type !== 'user') return false;
   const c = rec.message && rec.message.content;
   if (typeof c === 'string') return true;
-  return Array.isArray(c) && !c.some(b => b.type === 'tool_result');
+  return Array.isArray(c) && !c.some(b => b && b.type === 'tool_result');
 }
 
 function measureFile(file) {
@@ -73,9 +73,9 @@ function measureFile(file) {
     const usage = rec.message.usage;
     const think = (usage.output_tokens_details && usage.output_tokens_details.thinking_tokens) || 0;
     const visible = Math.max(0, (usage.output_tokens || 0) - think);
-    const blocks = rec.message.content || [];
-    const text = blocks.filter(b => b.type === 'text');
-    const tools = blocks.filter(b => b.type === 'tool_use');
+    const blocks = Array.isArray(rec.message.content) ? rec.message.content : [];
+    const text = blocks.filter(b => b && b.type === 'text');
+    const tools = blocks.filter(b => b && b.type === 'tool_use');
     const denom = chars(text) + chars(tools);
 
     acc.thinking += think;
