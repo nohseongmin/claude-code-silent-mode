@@ -94,6 +94,29 @@ test('mode switch persists and off silences the hook entirely', () => {
   }), '');
 });
 
+test('prompt hook decodes Korean intent split across UTF-8 chunks', () => {
+  const dir = tmpConfig();
+  fs.writeFileSync(path.join(dir, '.trappist-mode'), 'off');
+  const out = execFileSync(process.execPath, ['-e', `
+    const { Readable } = require('node:stream');
+    const input = Buffer.from(process.argv[2]);
+    const split = input.indexOf(Buffer.from('설')) + 1;
+    Object.defineProperty(process, 'stdin', {
+      value: Readable.from([input.subarray(0, split), input.subarray(split)], {
+        objectMode: false, highWaterMark: 1
+      })
+    });
+    process.argv[2] = 'prompt';
+    require(process.argv[1]);
+  `, HOOK, JSON.stringify({ prompt: '설명 말고 그냥 해' })], {
+    encoding: 'utf8',
+    env: { ...process.env, CLAUDE_CONFIG_DIR: dir }
+  });
+
+  assert.match(out, /TRAPPIST ACTIVE \(full\)/);
+  assert.equal(fs.readFileSync(path.join(dir, '.trappist-mode'), 'utf8'), 'full');
+});
+
 test('questions about disabling trappist preserve the current mode', () => {
   const dir = tmpConfig();
   runPrompt('/trappist ultra', dir);
