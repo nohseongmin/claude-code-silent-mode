@@ -116,6 +116,9 @@ function parse(prompt) {
 
 const entry = process.argv[2];
 
+// Global opt-out takes precedence over persisted modes and prompt commands.
+if ((entry === 'session' || entry === 'prompt') && envDefault() === OFF) process.exit(0);
+
 if (entry === 'session') {
   const mode = readMode() || envDefault();
   if (mode === OFF) process.exit(0);
