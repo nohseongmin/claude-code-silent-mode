@@ -138,3 +138,24 @@ test('TRAPPIST_MODE=off opts out without a flag file', () => {
   const dir = tmpConfig();
   assert.equal(runPrompt('do the thing', dir, { TRAPPIST_MODE: 'off' }), '');
 });
+
+test('TRAPPIST_MODE=off overrides persisted modes and activation commands without changing the flag', t => {
+  const dir = tmpConfig();
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const flag = path.join(dir, '.trappist-mode');
+
+  for (const mode of ['lite', 'full', 'ultra']) {
+    fs.writeFileSync(flag, mode);
+    const env = { TRAPPIST_MODE: 'off' };
+    assert.equal(execFileSync(process.execPath, [HOOK, 'session'], {
+      encoding: 'utf8',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir, ...env }
+    }), '');
+    assert.equal(runPrompt('do the thing', dir, env), '');
+    assert.equal(runPrompt('/trappist ultra', dir, env), '');
+    assert.equal(runPrompt('results only', dir, env), '');
+    assert.equal(fs.readFileSync(flag, 'utf8'), mode);
+    assert.match(runPrompt('next task', dir, { TRAPPIST_MODE: '' }),
+      new RegExp('TRAPPIST ACTIVE \\(' + mode + '\\)'));
+  }
+});
