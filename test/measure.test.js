@@ -3,6 +3,7 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
 const { isUserTurn, measureFile, RECEIPT_TOKENS } = require('../tools/measure.js');
 
@@ -15,6 +16,54 @@ function tmpTranscript(lines) {
 
 function assistantMsg(usage, content) {
   return { type: 'assistant', message: { usage, content } };
+}
+
+for (const args of [['--dir'], ['--dir', '--json']]) {
+  test('CLI rejects a missing path for ' + args.join(' '), t => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'measure-'));
+    t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+    fs.mkdirSync(path.join(dir, 'projects'));
+    fs.writeFileSync(path.join(dir, 'projects', 'session.jsonl'), JSON.stringify(
+      assistantMsg({ output_tokens: 50 }, [{ type: 'text', text: 'hello' }])
+    ) + '\n');
+
+    const result = spawnSync(process.execPath, [path.join(__dirname, '../tools/measure.js'), ...args], {
+      encoding: 'utf8',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir }
+    });
+
+    assert.ifError(result.error);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.match(result.stderr, /Error: --dir requires a path\./);
+    assert.match(result.stderr, /Usage: node tools\/measure\.js \[--dir <path>\] \[--json\]/);
+  });
+}
+
+for (const args of [[], ['--json']]) {
+  test('CLI measures an explicit directory ' + args.join(' '), t => {
+    const file = tmpTranscript([
+      assistantMsg({ output_tokens: 50 }, [{ type: 'text', text: 'hello' }])
+    ]);
+    const dir = path.dirname(file);
+    t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+    const result = spawnSync(process.execPath, [path.join(__dirname, '../tools/measure.js'), '--dir', dir, ...args], {
+      encoding: 'utf8'
+    });
+
+    assert.ifError(result.error);
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    if (args.includes('--json')) {
+      const measured = JSON.parse(result.stdout);
+      assert.equal(measured.sessions, 1);
+      assert.equal(measured.prose, 50);
+      assert.equal(measured.visible, 50);
+    } else {
+      assert.match(result.stdout, /1 sessions · 1 turns · 1 assistant messages/);
+    }
+  });
 }
 
 test('isUserTurn identifies a real user turn', () => {
