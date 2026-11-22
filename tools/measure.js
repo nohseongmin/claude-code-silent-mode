@@ -96,6 +96,11 @@ if (require.main === module) {
   const args = process.argv.slice(2);
   const asJson = args.includes('--json');
   const dirArg = args[args.indexOf('--dir') + 1];
+  if (args.includes('--dir') && (!dirArg || dirArg.startsWith('-'))) {
+    console.error('Error: --dir requires a path.');
+    console.error('Usage: node tools/measure.js [--dir <path>] [--json]');
+    process.exit(1);
+  }
   const root = args.includes('--dir') && dirArg
     ? dirArg
     : path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'projects');
